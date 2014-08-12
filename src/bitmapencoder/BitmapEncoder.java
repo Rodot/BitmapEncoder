@@ -106,7 +106,7 @@ public class BitmapEncoder {
                     }
                 }
                 if (hexFormatting) {
-                    output = output.concat(Integer.toString(thisByte, 16));
+                    output = output.concat(Integer.toString(thisByte, 16).toUpperCase());
                 }
                 output = output.concat(",");
             }

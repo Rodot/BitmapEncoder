@@ -45,7 +45,7 @@ public class BitmapFrame extends javax.swing.JFrame {
         thresholdSlider = new javax.swing.JSlider();
         jPanel2 = new javax.swing.JPanel();
         outputScrollPane = new javax.swing.JScrollPane();
-        outputText = new javax.swing.JTextArea();
+        outputTextArea = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
         scaleSlider = new javax.swing.JSlider();
         scaleLabel = new javax.swing.JLabel();
@@ -59,10 +59,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         ditheringLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Gamebuino Bitmap Encoder");
+        setTitle("Bitmap Encoder - Gamebuino");
         setMinimumSize(new java.awt.Dimension(640, 480));
         setName("bitmapFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(640, 480));
+        setPreferredSize(new java.awt.Dimension(800, 480));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -166,11 +166,11 @@ public class BitmapFrame extends javax.swing.JFrame {
         outputScrollPane.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
         outputScrollPane.setPreferredSize(new java.awt.Dimension(200, 200));
 
-        outputText.setColumns(20);
-        outputText.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
-        outputText.setRows(5);
-        outputText.setAutoscrolls(false);
-        outputScrollPane.setViewportView(outputText);
+        outputTextArea.setColumns(20);
+        outputTextArea.setFont(new java.awt.Font("Consolas", 0, 10)); // NOI18N
+        outputTextArea.setRows(5);
+        outputTextArea.setAutoscrolls(false);
+        outputScrollPane.setViewportView(outputTextArea);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -298,7 +298,7 @@ public class BitmapFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -424,7 +424,8 @@ public class BitmapFrame extends javax.swing.JFrame {
 
     public void updateOutput() {
         encoder.encode(thresholdSlider.getValue());
-        outputText.setText(encoder.output);
+        outputTextArea.setText(encoder.output);
+        outputTextArea.setCaretPosition(0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -442,7 +443,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     private javax.swing.JLabel original;
     private javax.swing.JPanel originalPanel;
     private javax.swing.JScrollPane outputScrollPane;
-    private javax.swing.JTextArea outputText;
+    private javax.swing.JTextArea outputTextArea;
     private javax.swing.JLabel preview;
     private javax.swing.JPanel previewPanel;
     private javax.swing.JLabel scaleLabel;
