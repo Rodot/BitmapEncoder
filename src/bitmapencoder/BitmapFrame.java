@@ -49,14 +49,12 @@ public class BitmapFrame extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         scaleSlider = new javax.swing.JSlider();
         scaleLabel = new javax.swing.JLabel();
-        nameText = new javax.swing.JTextField();
+        nameTextField = new javax.swing.JTextField();
         nameLabel = new javax.swing.JLabel();
         formattingBox = new javax.swing.JComboBox();
         formattingLabel = new javax.swing.JLabel();
         wrapCheckbox = new javax.swing.JCheckBox();
         wrapLabel = new javax.swing.JLabel();
-        ditheringBox = new javax.swing.JComboBox();
-        ditheringLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Bitmap Encoder - Gamebuino");
@@ -209,9 +207,10 @@ public class BitmapFrame extends javax.swing.JFrame {
 
         scaleLabel.setText("Preview scale");
 
-        nameText.setText("myBitmap");
+        nameTextField.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
+        nameTextField.setText("bitmapName");
 
-        nameLabel.setText("Variable name");
+        nameLabel.setText("Bitmap name");
 
         formattingBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Binary (ex: B00110010)", "Hexadecimal (ex: 0x32)" }));
         formattingBox.setName(""); // NOI18N
@@ -232,10 +231,6 @@ public class BitmapFrame extends javax.swing.JFrame {
 
         wrapLabel.setText("Wrap output lines");
 
-        ditheringBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Thresold", "Atkinson" }));
-
-        ditheringLabel.setText("Dithering");
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -243,10 +238,9 @@ public class BitmapFrame extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(ditheringBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(wrapCheckbox)
                     .addComponent(formattingBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(nameText, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(nameTextField, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(scaleSlider, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -257,8 +251,7 @@ public class BitmapFrame extends javax.swing.JFrame {
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(nameLabel)
                             .addComponent(formattingLabel)
-                            .addComponent(wrapLabel)
-                            .addComponent(ditheringLabel))
+                            .addComponent(wrapLabel))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel3Layout.setVerticalGroup(
@@ -273,7 +266,7 @@ public class BitmapFrame extends javax.swing.JFrame {
                         .addComponent(scaleSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(8, 8, 8)))
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(nameText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(nameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -283,10 +276,6 @@ public class BitmapFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(wrapCheckbox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(wrapLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(ditheringBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ditheringLabel))
                 .addContainerGap())
         );
 
@@ -363,6 +352,9 @@ public class BitmapFrame extends javax.swing.JFrame {
                 message.setText("Can't open the selected image");
             } else {
                 message.setText("Image succesfully loaded");
+                String fileName = file.getName();
+                fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+                nameTextField.setText(fileName);
                 redrawPreview();
             }
         }
@@ -423,14 +415,12 @@ public class BitmapFrame extends javax.swing.JFrame {
     }
 
     public void updateOutput() {
-        encoder.encode(thresholdSlider.getValue());
-        outputTextArea.setText(encoder.output);
+        encoder.bitmapName = nameTextField.getText();
+        outputTextArea.setText(encoder.generateOutput(thresholdSlider.getValue()));
         outputTextArea.setCaretPosition(0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox ditheringBox;
-    private javax.swing.JLabel ditheringLabel;
     private javax.swing.JComboBox formattingBox;
     private javax.swing.JLabel formattingLabel;
     private javax.swing.JPanel jPanel1;
@@ -438,7 +428,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JLabel message;
     private javax.swing.JLabel nameLabel;
-    private javax.swing.JTextField nameText;
+    private javax.swing.JTextField nameTextField;
     private javax.swing.JButton openButton;
     private javax.swing.JLabel original;
     private javax.swing.JPanel originalPanel;

@@ -19,9 +19,7 @@ public class BitmapEncoder {
     BufferedImage inputImage;
     BufferedImage outputImage;
     int encodedData[];
-    String header = "const byte myBitmap[] PROGMEM = {";
-    String footer = "};";
-    String output = "";
+    String bitmapName = "myBitmap";
     boolean hexFormatting = false;
     boolean wrapping = true;
 
@@ -63,12 +61,14 @@ public class BitmapEncoder {
         }
     }
 
-    void encode(int thres) {
+    String generateOutput(int thres) {
         if (inputImage == null) {
-            return;
+            return "";
         }
-        output = "";
-        output = output.concat(header);
+        String output = "";
+        output = output.concat("const byte ");
+        output = output.concat(bitmapName);
+        output = output.concat("[] PROGMEM = {");
         int width = ((inputImage.getWidth()-1)/8+1)*8; //round to the closest larger multiple of 8
         output = output.concat(width + "," + inputImage.getHeight() + ",");
         if (wrapping) {
@@ -114,7 +114,8 @@ public class BitmapEncoder {
                 output = output.concat("\n");
             }
         }
-        output = output.concat(footer);
+        output = output.concat("};");
+        return output;
     }
 
     static BufferedImage deepCopy(BufferedImage bi) {
