@@ -384,11 +384,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_scaleSliderStateChanged
 
     private void formattingBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formattingBoxActionPerformed
-        if (formattingBox.getSelectedIndex() == 1) {
-            encoder.hexFormatting = true;
-        } else {
-            encoder.hexFormatting = false;
-        }
+        encoder.hexFormatting = formattingBox.getSelectedIndex() == 1;
         if (jRadioButton1.isSelected()) {
             updateOutput();
         } else {
@@ -397,11 +393,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_formattingBoxActionPerformed
 
     private void wrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wrapCheckboxActionPerformed
-        if (wrapCheckbox.isSelected()) {
-            encoder.wrapping = true;
-        } else {
-            encoder.wrapping = false;
-        }
+        encoder.wrapping = wrapCheckbox.isSelected();
         if (jRadioButton1.isSelected()) {
             updateOutput();
         } else {
@@ -600,26 +592,17 @@ public class BitmapFrame extends javax.swing.JFrame {
              }*/
             javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.
                     getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException |
+                IllegalAccessException |
+                javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
                     java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new BitmapFrame().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new BitmapFrame().setVisible(true);
         });
     }
 
