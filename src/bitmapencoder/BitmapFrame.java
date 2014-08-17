@@ -438,6 +438,8 @@ public class BitmapFrame extends javax.swing.JFrame {
             message.setText("Loading...");
             redrawPreview();
             message.setText("Output updated");
+        } else if (multiFileModeRadioButton.isSelected()) {
+            processMultiFiles();
         }
     }//GEN-LAST:event_thresholdSliderMouseReleased
 
