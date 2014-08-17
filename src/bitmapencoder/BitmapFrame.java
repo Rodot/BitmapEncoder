@@ -5,10 +5,16 @@
  */
 package bitmapencoder;
 
-import java.io.*;
+import static bitmapencoder.BitmapEncoder.deepCopy;
+import static bitmapencoder.BitmapEncoder.isImage;
+import static bitmapencoder.BitmapEncoder.processSelectedFiles;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import bitmapencoder.BitmapEncoder;
 
 /**
  *
@@ -18,6 +24,8 @@ public class BitmapFrame extends javax.swing.JFrame {
 
     BitmapEncoder encoder = new BitmapEncoder();
     final JFileChooser fileChooser = new JFileChooser();
+    final JFileChooser multiFileChooser = new JFileChooser();
+    private File[] filesSelected = null;
 
     /**
      * Creates new form BitmapFrame
@@ -35,6 +43,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         openButton = new javax.swing.JButton();
         message = new javax.swing.JLabel();
@@ -43,6 +52,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         previewPanel = new javax.swing.JPanel();
         preview = new javax.swing.JLabel();
         thresholdSlider = new javax.swing.JSlider();
+        jPanel4 = new javax.swing.JPanel();
+        jRadioButton1 = new javax.swing.JRadioButton();
+        jRadioButton2 = new javax.swing.JRadioButton();
+        jCheckBox1 = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         outputScrollPane = new javax.swing.JScrollPane();
         outputTextArea = new javax.swing.JTextArea();
@@ -58,9 +71,9 @@ public class BitmapFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Bitmap Encoder - Gamebuino");
-        setMinimumSize(new java.awt.Dimension(640, 480));
+        setMinimumSize(new java.awt.Dimension(600, 502));
         setName("bitmapFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(800, 480));
+        setPreferredSize(new java.awt.Dimension(800, 600));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -108,7 +121,7 @@ public class BitmapFrame extends javax.swing.JFrame {
         );
         previewPanelLayout.setVerticalGroup(
             previewPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(preview, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(preview, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
         );
 
         thresholdSlider.setMaximum(765);
@@ -125,6 +138,55 @@ public class BitmapFrame extends javax.swing.JFrame {
             }
         });
 
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("File Selection Mode"));
+        jPanel4.setName(""); // NOI18N
+
+        buttonGroup1.add(jRadioButton1);
+        jRadioButton1.setSelected(true);
+        jRadioButton1.setText("Single File Mode");
+        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton1ActionPerformed(evt);
+            }
+        });
+
+        buttonGroup1.add(jRadioButton2);
+        jRadioButton2.setText("Multi File Mode (disables preview)");
+        jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButton2ActionPerformed(evt);
+            }
+        });
+
+        jCheckBox1.setText("Allow directory selection");
+        jCheckBox1.setEnabled(false);
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(jCheckBox1))
+                    .addComponent(jRadioButton1)
+                    .addComponent(jRadioButton2))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jRadioButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jRadioButton2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jCheckBox1)
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -132,32 +194,42 @@ public class BitmapFrame extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(originalPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(previewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(originalPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(previewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(openButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(message)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(message, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(thresholdSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                    .addComponent(originalPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(previewPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(10, 10, 10))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(45, 45, 45)
+                        .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(openButton)
+                            .addComponent(message, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(originalPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(previewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel4.getAccessibleContext().setAccessibleName("File Selection Mode");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Output"));
 
@@ -174,17 +246,11 @@ public class BitmapFrame extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 444, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Settings"));
@@ -285,10 +351,10 @@ public class BitmapFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -300,9 +366,9 @@ public class BitmapFrame extends javax.swing.JFrame {
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 98, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -312,7 +378,9 @@ public class BitmapFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void scaleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_scaleSliderStateChanged
-        redrawPreview();
+        if (jRadioButton1.isSelected()) {
+            redrawPreview();
+        }
     }//GEN-LAST:event_scaleSliderStateChanged
 
     private void formattingBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formattingBoxActionPerformed
@@ -321,7 +389,11 @@ public class BitmapFrame extends javax.swing.JFrame {
         } else {
             encoder.hexFormatting = false;
         }
-        updateOutput();
+        if (jRadioButton1.isSelected()) {
+            updateOutput();
+        } else {
+            processMultiFiles();
+        }
     }//GEN-LAST:event_formattingBoxActionPerformed
 
     private void wrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wrapCheckboxActionPerformed
@@ -330,13 +402,17 @@ public class BitmapFrame extends javax.swing.JFrame {
         } else {
             encoder.wrapping = false;
         }
-        updateOutput();
+        if (jRadioButton1.isSelected()) {
+            updateOutput();
+        } else {
+            processMultiFiles();
+        }
     }//GEN-LAST:event_wrapCheckboxActionPerformed
 
     private void thresholdSliderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_thresholdSliderMouseReleased
-        if (encoder.inputImage == null) {
+        if (encoder.inputImage == null && jRadioButton1.isSelected()) {
             message.setText("Open a image before you play with that slider!");
-        } else {
+        } else if (jRadioButton1.isSelected()) {
             message.setText("Loading...");
             redrawPreview();
             message.setText("Output updated");
@@ -344,21 +420,167 @@ public class BitmapFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_thresholdSliderMouseReleased
 
     private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
-        int returnVal = fileChooser.showOpenDialog(BitmapFrame.this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            encoder.open(file);
-            if (encoder.inputImage == null) {
-                message.setText("Can't open the selected image");
-            } else {
-                message.setText("Image succesfully loaded");
-                String fileName = file.getName();
-                fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-                nameTextField.setText(fileName);
-                redrawPreview();
+        if (jRadioButton1.isSelected()) {
+            int returnVal = fileChooser.showOpenDialog(BitmapFrame.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                encoder.open(file);
+                if (encoder.inputImage == null) {
+                    message.setText("Can't open the selected image");
+                } else {
+                    message.setText("Image succesfully loaded");
+                    String fileName = file.getName();
+                    fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+                    nameTextField.setText(fileName);
+                    redrawPreview();
+                }
             }
+        } else {
+
+            if (jCheckBox1.isSelected()) {
+                multiFileChooser.setFileSelectionMode(
+                        JFileChooser.FILES_AND_DIRECTORIES);
+            } else {
+                multiFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            }
+            multiFileChooser.setMultiSelectionEnabled(true);
+            int returnVal = multiFileChooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                filesSelected = multiFileChooser.getSelectedFiles();
+            }
+            processMultiFiles();
         }
     }//GEN-LAST:event_openButtonActionPerformed
+
+    private void processMultiFiles() {
+        outputTextArea.setText("");
+        String eol = System.lineSeparator();
+        File[] filesToConvert = processSelectedFiles(filesSelected, false);
+        for (File f : filesToConvert) {
+            if (f != null) {
+                if (isImage(f)) {
+                    try {
+                        System.out.println("Reading image " + f.getName()
+                                + "...");
+                        BufferedImage img = ImageIO.read(f);
+                        if (img != null) {
+                            if ((img.getWidth() > 200) || (img.getHeight()
+                                    > 200)) {
+                                System.out.println("File " + f.getName()
+                                        + " is too large.");
+                                continue;
+                            }
+                            System.out.println("Deep copy of " + f.getName()
+                                    + ".");
+                            BufferedImage newImg = deepCopy(img);
+                            int threshold = thresholdSlider.getValue();
+                            System.out.println(
+                                    "Setting threshold for new image.");
+                            for (int y = 0; y < img.getHeight(); y++) {
+                                for (int x = 0; x < img.getWidth(); x++) {
+                                    int rgb = img.getRGB(x, y);
+                                    int red = (rgb >> 16) & 0x000000FF;
+                                    int green = (rgb >> 8) & 0x000000FF;
+                                    int blue = (rgb) & 0x000000FF;
+                                    int value = red + green + blue;
+                                    if (value > threshold) {
+                                        newImg.setRGB(x, y, 0x00FFFFFF);
+                                    } else {
+                                        newImg.setRGB(x, y, 0);
+                                    }
+                                }
+                            }
+                            String bitmapName = f.getName().substring(0, f.
+                                    getName().lastIndexOf("."));
+                            System.out.println("Generating output for " + f.
+                                    getName() + ".");
+                            String output = outputTextArea.getText();
+                            output = output.concat("const byte ");
+                            output = output.concat(bitmapName);
+                            output = output.concat("[] PROGMEM = {");
+                            if (encoder.wrapping) {
+                                output = output.concat(eol);
+                            }
+                            int width = ((img.getWidth() - 1) / 8 + 1) * 8; //round to the closest larger multiple of 8
+                            output = output.concat(width + "," + img.
+                                    getHeight() + ",");
+                            if (encoder.wrapping) {
+                                output = output.concat(eol);
+                            }
+                            for (int y = 0; y < img.getHeight(); y++) {
+                                for (int x = 0; x < img.getWidth(); x += 8) {
+                                    if (encoder.hexFormatting) {
+                                        output = output.concat("0x");
+                                    } else {
+                                        output = output.concat("B");
+                                    }
+                                    int thisByte = 0;
+                                    for (int b = 0; b < 8; b++) {
+                                        int value = 0xFFFF;
+                                        if (x + b < img.getWidth()) {
+                                            int rgb = img.getRGB(x + b, y);
+                                            int red = (rgb >> 16)
+                                                    & 0x000000FF;
+                                            int green = (rgb >> 8)
+                                                    & 0x000000FF;
+                                            int blue = (rgb) & 0x000000FF;
+                                            value = red + green + blue;
+                                        }
+                                        if (encoder.hexFormatting) {
+                                            thisByte *= 2;
+                                            if (value < threshold) {
+                                                thisByte++;
+                                            }
+                                        } else {//binary formatting
+                                            if (value < threshold) {
+                                                output = output.concat("1");
+                                            } else {
+                                                output = output.concat("0");
+                                            }
+
+                                        }
+                                    }
+                                    if (encoder.hexFormatting) {
+                                        output = output.concat(Integer.
+                                                toString(thisByte, 16).
+                                                toUpperCase());
+                                    }
+                                    output = output.concat(",");
+                                }
+                                if (encoder.wrapping) {
+                                    output = output.concat(eol);
+                                }
+                            }
+                            output = output.concat("};" + eol);
+                            if (encoder.wrapping) {
+                                output = output.concat(eol);
+                            }
+                            outputTextArea.setText(output);
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(BitmapFrame.class.
+                                getName()).
+                                log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    System.out.println("File " + f.getName()
+                            + " is not an image.");
+                }
+            }
+        }
+    }
+    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
+        scaleSlider.setEnabled(true);
+        nameTextField.setEnabled(true);
+        jCheckBox1.setSelected(false);
+        jCheckBox1.setEnabled(false);
+    }//GEN-LAST:event_jRadioButton1ActionPerformed
+
+    private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
+        scaleSlider.setEnabled(false);
+        nameTextField.setEnabled(false);
+        jCheckBox1.setEnabled(true);
+    }//GEN-LAST:event_jRadioButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -376,15 +598,20 @@ public class BitmapFrame extends javax.swing.JFrame {
              break;
              }
              }*/
-            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.
+                    getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -400,14 +627,16 @@ public class BitmapFrame extends javax.swing.JFrame {
         int scale = scaleSlider.getValue();
         //input image
         Image in = BitmapEncoder.deepCopy(encoder.inputImage);
-        in = in.getScaledInstance(in.getWidth(null) * scale, in.getHeight(null) * scale, java.awt.Image.SCALE_REPLICATE);
+        in = in.getScaledInstance(in.getWidth(null) * scale, in.getHeight(null)
+                * scale, java.awt.Image.SCALE_REPLICATE);
         ImageIcon originalIcon = new ImageIcon(in);
         original.setText("");
         original.setIcon(originalIcon);
         //output image
         encoder.threshold(thresholdSlider.getValue());
         Image out = BitmapEncoder.deepCopy(encoder.outputImage);
-        out = out.getScaledInstance(out.getWidth(null) * scale, out.getHeight(null) * scale, java.awt.Image.SCALE_REPLICATE);
+        out = out.getScaledInstance(out.getWidth(null) * scale, out.getHeight(
+                null) * scale, java.awt.Image.SCALE_REPLICATE);
         ImageIcon previewIcon = new ImageIcon(out);
         preview.setText("");
         preview.setIcon(previewIcon);
@@ -416,16 +645,22 @@ public class BitmapFrame extends javax.swing.JFrame {
 
     public void updateOutput() {
         encoder.bitmapName = nameTextField.getText();
-        outputTextArea.setText(encoder.generateOutput(thresholdSlider.getValue()));
+        outputTextArea.setText(encoder.
+                generateOutput(thresholdSlider.getValue()));
         outputTextArea.setCaretPosition(0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox formattingBox;
     private javax.swing.JLabel formattingLabel;
+    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JRadioButton jRadioButton1;
+    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JLabel message;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField nameTextField;
