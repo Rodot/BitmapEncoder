@@ -447,8 +447,8 @@ public class BitmapFrame extends javax.swing.JFrame {
             int returnVal = multiFileChooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 filesSelected = multiFileChooser.getSelectedFiles();
+                processMultiFiles();
             }
-            processMultiFiles();
         }
     }//GEN-LAST:event_openButtonActionPerformed
 
