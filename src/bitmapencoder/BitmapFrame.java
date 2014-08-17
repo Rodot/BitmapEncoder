@@ -32,6 +32,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     private byte singleFormattingSetting = 0;
     private boolean multiWrapSetting = false;
     private boolean singleWrapSetting = true;
+    private boolean allowDirectorySelection = false;
 
     /**
      * Creates new form BitmapFrame
@@ -46,6 +47,7 @@ public class BitmapFrame extends javax.swing.JFrame {
         }
         formattingBox.setSelectedIndex((int) singleFormattingSetting);
         wrapCheckbox.setSelected(singleWrapSetting);
+        jCheckBox1.setSelected(allowDirectorySelection);
     }
 
     /**
@@ -179,6 +181,11 @@ public class BitmapFrame extends javax.swing.JFrame {
 
         jCheckBox1.setText("Allow directory selection");
         jCheckBox1.setEnabled(false);
+        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -620,6 +627,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_formWindowClosing
 
+    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
+        allowDirectorySelection = jCheckBox1.isSelected();
+    }//GEN-LAST:event_jCheckBox1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -709,6 +720,9 @@ public class BitmapFrame extends javax.swing.JFrame {
                     case "MULTI_WRAPPING":
                         multiWrapSetting = Boolean.valueOf(setting);
                         break;
+                    case "ALLOW_DIRECTORY_SELECTION":
+                        allowDirectorySelection = Boolean.valueOf(setting);
+                        break;
                     default:
                         break;
                 }
@@ -730,6 +744,8 @@ public class BitmapFrame extends javax.swing.JFrame {
             out.write("SINGLE_WRAPPING: " + singleWrapSetting);
             out.newLine();
             out.write("MULTI_WRAPPING: " + multiWrapSetting);
+            out.newLine();
+            out.write("ALLOW_DIRECTORY_SELECTION: " + allowDirectorySelection);
             out.newLine();
             out.close();
         }

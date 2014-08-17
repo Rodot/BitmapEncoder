@@ -134,7 +134,7 @@ public class BitmapEncoder {
         if (list == null) {
             return 0;
         }
-        
+
         if (!recursed) {
             fileCount = 0;
         }
@@ -182,7 +182,7 @@ public class BitmapEncoder {
         }
         return filesToConvert;
     }
-    
+
     protected BufferedImage getInputImage() {
         return inputImage;
     }
@@ -222,6 +222,4 @@ public class BitmapEncoder {
     protected void setWrapping(boolean wrapping) {
         this.wrapping = wrapping;
     }
-    
-    
 }
