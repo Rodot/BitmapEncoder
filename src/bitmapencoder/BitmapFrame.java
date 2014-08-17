@@ -46,7 +46,9 @@ public class BitmapFrame extends javax.swing.JFrame {
                     log(Level.SEVERE, null, ex);
         }
         formattingBox.setSelectedIndex((int) singleFormattingSetting);
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
         wrapCheckbox.setSelected(singleWrapSetting);
+        encoder.setWrapping(wrapCheckbox.isSelected());
         allowDirectorySelectionCheckBox.setSelected(allowDirectorySelection);
     }
 
@@ -607,7 +609,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         nameTextField.setEnabled(true);
         allowDirectorySelectionCheckBox.setEnabled(false);
         formattingBox.setSelectedIndex((int) singleFormattingSetting);
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
         wrapCheckbox.setSelected(singleWrapSetting);
+        encoder.setWrapping(wrapCheckbox.isSelected());
+        updateOutput();
     }//GEN-LAST:event_singleFileModeRadioButtonActionPerformed
 
     private void multiFileModeRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multiFileModeRadioButtonActionPerformed
@@ -615,7 +620,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         nameTextField.setEnabled(false);
         allowDirectorySelectionCheckBox.setEnabled(true);
         formattingBox.setSelectedIndex((int) multiFormattingSetting);
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
         wrapCheckbox.setSelected(multiWrapSetting);
+        encoder.setWrapping(wrapCheckbox.isSelected());
+        processMultiFiles();
     }//GEN-LAST:event_multiFileModeRadioButtonActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
