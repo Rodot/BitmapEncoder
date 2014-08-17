@@ -47,7 +47,7 @@ public class BitmapFrame extends javax.swing.JFrame {
         }
         formattingBox.setSelectedIndex((int) singleFormattingSetting);
         wrapCheckbox.setSelected(singleWrapSetting);
-        jCheckBox1.setSelected(allowDirectorySelection);
+        allowDirectorySelectionCheckBox.setSelected(allowDirectorySelection);
     }
 
     /**
@@ -68,10 +68,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         previewPanel = new javax.swing.JPanel();
         preview = new javax.swing.JLabel();
         thresholdSlider = new javax.swing.JSlider();
-        jPanel4 = new javax.swing.JPanel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        FileSelectionPanel = new javax.swing.JPanel();
+        singleFileModeRadioButton = new javax.swing.JRadioButton();
+        multiFileModeRadioButton = new javax.swing.JRadioButton();
+        allowDirectorySelectionCheckBox = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         outputScrollPane = new javax.swing.JScrollPane();
         outputTextArea = new javax.swing.JTextArea();
@@ -159,57 +159,57 @@ public class BitmapFrame extends javax.swing.JFrame {
             }
         });
 
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("File Selection Mode"));
-        jPanel4.setName(""); // NOI18N
+        FileSelectionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("File Selection Mode"));
+        FileSelectionPanel.setName(""); // NOI18N
 
-        buttonGroup1.add(jRadioButton1);
-        jRadioButton1.setSelected(true);
-        jRadioButton1.setText("Single File Mode");
-        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroup1.add(singleFileModeRadioButton);
+        singleFileModeRadioButton.setSelected(true);
+        singleFileModeRadioButton.setText("Single File Mode");
+        singleFileModeRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton1ActionPerformed(evt);
+                singleFileModeRadioButtonActionPerformed(evt);
             }
         });
 
-        buttonGroup1.add(jRadioButton2);
-        jRadioButton2.setText("Multi File Mode (disables preview)");
-        jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroup1.add(multiFileModeRadioButton);
+        multiFileModeRadioButton.setText("Multi File Mode (disables preview)");
+        multiFileModeRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton2ActionPerformed(evt);
+                multiFileModeRadioButtonActionPerformed(evt);
             }
         });
 
-        jCheckBox1.setText("Allow directory selection");
-        jCheckBox1.setEnabled(false);
-        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+        allowDirectorySelectionCheckBox.setText("Allow directory selection");
+        allowDirectorySelectionCheckBox.setEnabled(false);
+        allowDirectorySelectionCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox1ActionPerformed(evt);
+                allowDirectorySelectionCheckBoxActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+        javax.swing.GroupLayout FileSelectionPanelLayout = new javax.swing.GroupLayout(FileSelectionPanel);
+        FileSelectionPanel.setLayout(FileSelectionPanelLayout);
+        FileSelectionPanelLayout.setHorizontalGroup(
+            FileSelectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(FileSelectionPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGroup(FileSelectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(FileSelectionPanelLayout.createSequentialGroup()
                         .addGap(21, 21, 21)
-                        .addComponent(jCheckBox1))
-                    .addComponent(jRadioButton1)
-                    .addComponent(jRadioButton2))
+                        .addComponent(allowDirectorySelectionCheckBox))
+                    .addComponent(singleFileModeRadioButton)
+                    .addComponent(multiFileModeRadioButton))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+        FileSelectionPanelLayout.setVerticalGroup(
+            FileSelectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(FileSelectionPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jRadioButton1)
+                .addComponent(singleFileModeRadioButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton2)
+                .addComponent(multiFileModeRadioButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
+                .addComponent(allowDirectorySelectionCheckBox)
                 .addContainerGap(8, Short.MAX_VALUE))
         );
 
@@ -225,7 +225,7 @@ public class BitmapFrame extends javax.swing.JFrame {
                             .addComponent(originalPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(previewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(FileSelectionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(openButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -243,7 +243,7 @@ public class BitmapFrame extends javax.swing.JFrame {
                         .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(FileSelectionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(openButton)
@@ -402,14 +402,14 @@ public class BitmapFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void scaleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_scaleSliderStateChanged
-        if (jRadioButton1.isSelected()) {
+        if (singleFileModeRadioButton.isSelected()) {
             redrawPreview();
         }
     }//GEN-LAST:event_scaleSliderStateChanged
 
     private void formattingBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formattingBoxActionPerformed
         encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
-        if (jRadioButton1.isSelected()) {
+        if (singleFileModeRadioButton.isSelected()) {
             singleFormattingSetting = (byte) formattingBox.getSelectedIndex();
             updateOutput();
         } else {
@@ -420,7 +420,7 @@ public class BitmapFrame extends javax.swing.JFrame {
 
     private void wrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wrapCheckboxActionPerformed
         encoder.setWrapping(wrapCheckbox.isSelected());
-        if (jRadioButton1.isSelected()) {
+        if (singleFileModeRadioButton.isSelected()) {
             singleWrapSetting = wrapCheckbox.isSelected();
             updateOutput();
         } else {
@@ -430,9 +430,9 @@ public class BitmapFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_wrapCheckboxActionPerformed
 
     private void thresholdSliderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_thresholdSliderMouseReleased
-        if (encoder.getInputImage() == null && jRadioButton1.isSelected()) {
+        if (encoder.getInputImage() == null && singleFileModeRadioButton.isSelected()) {
             message.setText("Open a image before you play with that slider!");
-        } else if (jRadioButton1.isSelected()) {
+        } else if (singleFileModeRadioButton.isSelected()) {
             message.setText("Loading...");
             redrawPreview();
             message.setText("Output updated");
@@ -440,7 +440,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_thresholdSliderMouseReleased
 
     private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
-        if (jRadioButton1.isSelected()) {
+        if (singleFileModeRadioButton.isSelected()) {
             int returnVal = fileChooser.showOpenDialog(BitmapFrame.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 lastSingleDirectory = fileChooser.getCurrentDirectory().
@@ -459,7 +459,7 @@ public class BitmapFrame extends javax.swing.JFrame {
             }
         } else {
 
-            if (jCheckBox1.isSelected()) {
+            if (allowDirectorySelectionCheckBox.isSelected()) {
                 multiFileChooser.setFileSelectionMode(
                         JFileChooser.FILES_AND_DIRECTORIES);
             } else {
@@ -602,21 +602,21 @@ public class BitmapFrame extends javax.swing.JFrame {
             }
         }
     }
-    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
+    private void singleFileModeRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singleFileModeRadioButtonActionPerformed
         scaleSlider.setEnabled(true);
         nameTextField.setEnabled(true);
-        jCheckBox1.setEnabled(false);
+        allowDirectorySelectionCheckBox.setEnabled(false);
         formattingBox.setSelectedIndex((int) singleFormattingSetting);
         wrapCheckbox.setSelected(singleWrapSetting);
-    }//GEN-LAST:event_jRadioButton1ActionPerformed
+    }//GEN-LAST:event_singleFileModeRadioButtonActionPerformed
 
-    private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
+    private void multiFileModeRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multiFileModeRadioButtonActionPerformed
         scaleSlider.setEnabled(false);
         nameTextField.setEnabled(false);
-        jCheckBox1.setEnabled(true);
+        allowDirectorySelectionCheckBox.setEnabled(true);
         formattingBox.setSelectedIndex((int) multiFormattingSetting);
         wrapCheckbox.setSelected(multiWrapSetting);
-    }//GEN-LAST:event_jRadioButton2ActionPerformed
+    }//GEN-LAST:event_multiFileModeRadioButtonActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         try {
@@ -627,9 +627,9 @@ public class BitmapFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_formWindowClosing
 
-    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        allowDirectorySelection = jCheckBox1.isSelected();
-    }//GEN-LAST:event_jCheckBox1ActionPerformed
+    private void allowDirectorySelectionCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_allowDirectorySelectionCheckBoxActionPerformed
+        allowDirectorySelection = allowDirectorySelectionCheckBox.isSelected();
+    }//GEN-LAST:event_allowDirectorySelectionCheckBoxActionPerformed
 
     /**
      * @param args the command line arguments
@@ -752,17 +752,16 @@ public class BitmapFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel FileSelectionPanel;
+    private javax.swing.JCheckBox allowDirectorySelectionCheckBox;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox formattingBox;
     private javax.swing.JLabel formattingLabel;
-    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JLabel message;
+    private javax.swing.JRadioButton multiFileModeRadioButton;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField nameTextField;
     private javax.swing.JButton openButton;
@@ -774,6 +773,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     private javax.swing.JPanel previewPanel;
     private javax.swing.JLabel scaleLabel;
     private javax.swing.JSlider scaleSlider;
+    private javax.swing.JRadioButton singleFileModeRadioButton;
     private javax.swing.JSlider thresholdSlider;
     private javax.swing.JCheckBox wrapCheckbox;
     private javax.swing.JLabel wrapLabel;

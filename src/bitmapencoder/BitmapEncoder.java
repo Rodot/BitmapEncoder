@@ -18,7 +18,6 @@ public class BitmapEncoder {
 
     private BufferedImage inputImage;
     private BufferedImage outputImage;
-    private int encodedData[];
     private String bitmapName = "myBitmap";
     private boolean hexFormatting = false;
     private boolean wrapping = true;
