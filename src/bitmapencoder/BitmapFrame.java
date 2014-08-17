@@ -50,6 +50,8 @@ public class BitmapFrame extends javax.swing.JFrame {
         wrapCheckbox.setSelected(singleWrapSetting);
         encoder.setWrapping(wrapCheckbox.isSelected());
         allowDirectorySelectionCheckBox.setSelected(allowDirectorySelection);
+        fileChooser.setCurrentDirectory(new File(lastSingleDirectory));
+        multiFileChooser.setCurrentDirectory(new File(lastMultiDirectory));
     }
 
     /**
@@ -712,11 +714,9 @@ public class BitmapFrame extends javax.swing.JFrame {
                 switch (settingName) {
                     case "LAST_SINGLE_DIRECTORY":
                         lastSingleDirectory = setting;
-                        fileChooser.setCurrentDirectory(new File(setting));
                         break;
                     case "LAST_MULTI_DIRECTORY":
                         lastMultiDirectory = setting;
-                        multiFileChooser.setCurrentDirectory(new File(setting));
                         break;
                     case "SINGLE_FORMATTING":
                         singleFormattingSetting = Byte.valueOf(setting);
