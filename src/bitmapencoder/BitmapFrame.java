@@ -26,12 +26,26 @@ public class BitmapFrame extends javax.swing.JFrame {
     final JFileChooser fileChooser = new JFileChooser();
     final JFileChooser multiFileChooser = new JFileChooser();
     private File[] filesSelected = null;
+    private String lastSingleDirectory = System.getProperty("user.home");
+    private String lastMultiDirectory = System.getProperty("user.home");
+    private byte multiFormattingSetting = 1;
+    private byte singleFormattingSetting = 0;
+    private boolean multiWrapSetting = false;
+    private boolean singleWrapSetting = true;
 
     /**
      * Creates new form BitmapFrame
      */
-    public BitmapFrame() {
+    private BitmapFrame() {
         initComponents();
+        try {
+            loadSettingsFromDisk();
+        } catch (IOException ex) {
+            Logger.getLogger(BitmapFrame.class.getName()).
+                    log(Level.SEVERE, null, ex);
+        }
+        formattingBox.setSelectedIndex((int) singleFormattingSetting);
+        wrapCheckbox.setSelected(singleWrapSetting);
     }
 
     /**
@@ -74,6 +88,11 @@ public class BitmapFrame extends javax.swing.JFrame {
         setMinimumSize(new java.awt.Dimension(600, 502));
         setName("bitmapFrame"); // NOI18N
         setPreferredSize(new java.awt.Dimension(800, 600));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -229,8 +248,6 @@ public class BitmapFrame extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel4.getAccessibleContext().setAccessibleName("File Selection Mode");
-
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Output"));
 
         outputScrollPane.setFont(new java.awt.Font("Monospaced", 0, 11)); // NOI18N
@@ -384,25 +401,29 @@ public class BitmapFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_scaleSliderStateChanged
 
     private void formattingBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formattingBoxActionPerformed
-        encoder.hexFormatting = formattingBox.getSelectedIndex() == 1;
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
         if (jRadioButton1.isSelected()) {
+            singleFormattingSetting = (byte) formattingBox.getSelectedIndex();
             updateOutput();
         } else {
+            multiFormattingSetting = (byte) formattingBox.getSelectedIndex();
             processMultiFiles();
         }
     }//GEN-LAST:event_formattingBoxActionPerformed
 
     private void wrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wrapCheckboxActionPerformed
-        encoder.wrapping = wrapCheckbox.isSelected();
+        encoder.setWrapping(wrapCheckbox.isSelected());
         if (jRadioButton1.isSelected()) {
+            singleWrapSetting = wrapCheckbox.isSelected();
             updateOutput();
         } else {
+            multiWrapSetting = wrapCheckbox.isSelected();;
             processMultiFiles();
         }
     }//GEN-LAST:event_wrapCheckboxActionPerformed
 
     private void thresholdSliderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_thresholdSliderMouseReleased
-        if (encoder.inputImage == null && jRadioButton1.isSelected()) {
+        if (encoder.getInputImage() == null && jRadioButton1.isSelected()) {
             message.setText("Open a image before you play with that slider!");
         } else if (jRadioButton1.isSelected()) {
             message.setText("Loading...");
@@ -415,9 +436,11 @@ public class BitmapFrame extends javax.swing.JFrame {
         if (jRadioButton1.isSelected()) {
             int returnVal = fileChooser.showOpenDialog(BitmapFrame.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastSingleDirectory = fileChooser.getCurrentDirectory().
+                        getAbsolutePath();
                 File file = fileChooser.getSelectedFile();
                 encoder.open(file);
-                if (encoder.inputImage == null) {
+                if (encoder.getInputImage() == null) {
                     message.setText("Can't open the selected image");
                 } else {
                     message.setText("Image succesfully loaded");
@@ -438,9 +461,17 @@ public class BitmapFrame extends javax.swing.JFrame {
             multiFileChooser.setMultiSelectionEnabled(true);
             int returnVal = multiFileChooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastMultiDirectory = multiFileChooser.getCurrentDirectory().
+                        getAbsolutePath();
                 filesSelected = multiFileChooser.getSelectedFiles();
                 processMultiFiles();
             }
+        }
+        try {
+            saveSettingsToDisk(new File("settings.dat"));
+        } catch (IOException ex) {
+            Logger.getLogger(BitmapFrame.class.getName()).
+                    log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_openButtonActionPerformed
 
@@ -448,6 +479,9 @@ public class BitmapFrame extends javax.swing.JFrame {
         outputTextArea.setText("");
         String eol = System.lineSeparator();
         File[] filesToConvert = processSelectedFiles(filesSelected, false);
+        if (filesToConvert == null) {
+            return;
+        }
         for (File f : filesToConvert) {
             if (f != null) {
                 if (isImage(f)) {
@@ -490,18 +524,18 @@ public class BitmapFrame extends javax.swing.JFrame {
                             output = output.concat("const byte ");
                             output = output.concat(bitmapName);
                             output = output.concat("[] PROGMEM = {");
-                            if (encoder.wrapping) {
+                            if (encoder.isWrapping()) {
                                 output = output.concat(eol);
                             }
                             int width = ((img.getWidth() - 1) / 8 + 1) * 8; //round to the closest larger multiple of 8
                             output = output.concat(width + "," + img.
                                     getHeight() + ",");
-                            if (encoder.wrapping) {
+                            if (encoder.isWrapping()) {
                                 output = output.concat(eol);
                             }
                             for (int y = 0; y < img.getHeight(); y++) {
                                 for (int x = 0; x < img.getWidth(); x += 8) {
-                                    if (encoder.hexFormatting) {
+                                    if (encoder.isHexFormatting()) {
                                         output = output.concat("0x");
                                     } else {
                                         output = output.concat("B");
@@ -518,7 +552,7 @@ public class BitmapFrame extends javax.swing.JFrame {
                                             int blue = (rgb) & 0x000000FF;
                                             value = red + green + blue;
                                         }
-                                        if (encoder.hexFormatting) {
+                                        if (encoder.isHexFormatting()) {
                                             thisByte *= 2;
                                             if (value < threshold) {
                                                 thisByte++;
@@ -532,19 +566,19 @@ public class BitmapFrame extends javax.swing.JFrame {
 
                                         }
                                     }
-                                    if (encoder.hexFormatting) {
+                                    if (encoder.isHexFormatting()) {
                                         output = output.concat(Integer.
                                                 toString(thisByte, 16).
                                                 toUpperCase());
                                     }
                                     output = output.concat(",");
                                 }
-                                if (encoder.wrapping) {
+                                if (encoder.isWrapping()) {
                                     output = output.concat(eol);
                                 }
                             }
                             output = output.concat("};" + eol);
-                            if (encoder.wrapping) {
+                            if (encoder.isWrapping()) {
                                 output = output.concat(eol);
                             }
                             outputTextArea.setText(output);
@@ -564,15 +598,27 @@ public class BitmapFrame extends javax.swing.JFrame {
     private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
         scaleSlider.setEnabled(true);
         nameTextField.setEnabled(true);
-        jCheckBox1.setSelected(false);
         jCheckBox1.setEnabled(false);
+        formattingBox.setSelectedIndex((int) singleFormattingSetting);
+        wrapCheckbox.setSelected(singleWrapSetting);
     }//GEN-LAST:event_jRadioButton1ActionPerformed
 
     private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
         scaleSlider.setEnabled(false);
         nameTextField.setEnabled(false);
         jCheckBox1.setEnabled(true);
+        formattingBox.setSelectedIndex((int) multiFormattingSetting);
+        wrapCheckbox.setSelected(multiWrapSetting);
     }//GEN-LAST:event_jRadioButton2ActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        try {
+            saveSettingsToDisk(new File("settings.dat"));
+        } catch (IOException ex) {
+            Logger.getLogger(BitmapFrame.class.getName()).
+                    log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
@@ -606,10 +652,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         });
     }
 
-    public void redrawPreview() {
+    private void redrawPreview() {
         int scale = scaleSlider.getValue();
         //input image
-        Image in = BitmapEncoder.deepCopy(encoder.inputImage);
+        Image in = BitmapEncoder.deepCopy(encoder.getInputImage());
         in = in.getScaledInstance(in.getWidth(null) * scale, in.getHeight(null)
                 * scale, java.awt.Image.SCALE_REPLICATE);
         ImageIcon originalIcon = new ImageIcon(in);
@@ -617,7 +663,7 @@ public class BitmapFrame extends javax.swing.JFrame {
         original.setIcon(originalIcon);
         //output image
         encoder.threshold(thresholdSlider.getValue());
-        Image out = BitmapEncoder.deepCopy(encoder.outputImage);
+        Image out = BitmapEncoder.deepCopy(encoder.getOutputImage());
         out = out.getScaledInstance(out.getWidth(null) * scale, out.getHeight(
                 null) * scale, java.awt.Image.SCALE_REPLICATE);
         ImageIcon previewIcon = new ImageIcon(out);
@@ -626,11 +672,67 @@ public class BitmapFrame extends javax.swing.JFrame {
         updateOutput();
     }
 
-    public void updateOutput() {
-        encoder.bitmapName = nameTextField.getText();
+    private void updateOutput() {
+        encoder.setBitmapName(nameTextField.getText());
         outputTextArea.setText(encoder.
                 generateOutput(thresholdSlider.getValue()));
         outputTextArea.setCaretPosition(0);
+    }
+
+    private void loadSettingsFromDisk() throws IOException {
+        File saveFile = new File("settings.dat");
+        if (saveFile.createNewFile()) {
+            saveSettingsToDisk(saveFile);
+        } else {
+            BufferedReader br = new BufferedReader(new FileReader(saveFile));
+            for (String line; (line = br.readLine()) != null;) {
+                String settingName = line.trim().substring(0, line.indexOf(":"));
+                String setting = line.substring((line.indexOf(":") + 1)).trim();
+                switch (settingName) {
+                    case "LAST_SINGLE_DIRECTORY":
+                        lastSingleDirectory = setting;
+                        fileChooser.setCurrentDirectory(new File(setting));
+                        break;
+                    case "LAST_MULTI_DIRECTORY":
+                        lastMultiDirectory = setting;
+                        multiFileChooser.setCurrentDirectory(new File(setting));
+                        break;
+                    case "SINGLE_FORMATTING":
+                        singleFormattingSetting = Byte.valueOf(setting);
+                        break;
+                    case "MULTI_FORMATTING":
+                        multiFormattingSetting = Byte.valueOf(setting);
+                        break;
+                    case "SINGLE_WRAPPING":
+                        singleWrapSetting = Boolean.valueOf(setting);
+                        break;
+                    case "MULTI_WRAPPING":
+                        multiWrapSetting = Boolean.valueOf(setting);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // line is not visible here.
+        }
+    }
+
+    private void saveSettingsToDisk(File saveFile) throws IOException {
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(saveFile))) {
+            out.write("LAST_SINGLE_DIRECTORY: " + lastSingleDirectory);
+            out.newLine();
+            out.write("LAST_MULTI_DIRECTORY: " + lastMultiDirectory);
+            out.newLine();
+            out.write("SINGLE_FORMATTING: " + singleFormattingSetting);
+            out.newLine();
+            out.write("MULTI_FORMATTING: " + multiFormattingSetting);
+            out.newLine();
+            out.write("SINGLE_WRAPPING: " + singleWrapSetting);
+            out.newLine();
+            out.write("MULTI_WRAPPING: " + multiWrapSetting);
+            out.newLine();
+            out.close();
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

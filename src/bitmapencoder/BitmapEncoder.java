@@ -16,20 +16,20 @@ import java.awt.image.*;
  */
 public class BitmapEncoder {
 
-    BufferedImage inputImage;
-    BufferedImage outputImage;
-    int encodedData[];
-    String bitmapName = "myBitmap";
-    boolean hexFormatting = false;
-    boolean wrapping = true;
+    private BufferedImage inputImage;
+    private BufferedImage outputImage;
+    private int encodedData[];
+    private String bitmapName = "myBitmap";
+    private boolean hexFormatting = false;
+    private boolean wrapping = true;
     private static File[] filesToConvert;
     private static int imageCounter;
     private static int fileCount;
 
-    void BitmapEncoder() {
+    protected void BitmapEncoder() {
     }
 
-    void open(File file) {
+    protected void open(File file) {
         try {
             inputImage = ImageIO.read(file);
         } catch (IOException e) {
@@ -44,7 +44,7 @@ public class BitmapEncoder {
         }
     }
 
-    void threshold(int thres) {
+    protected void threshold(int thres) {
         if (inputImage == null) {
             return;
         }
@@ -64,7 +64,7 @@ public class BitmapEncoder {
         }
     }
 
-    String generateOutput(int thres) {
+    protected String generateOutput(int thres) {
         if (inputImage == null) {
             return "";
         }
@@ -122,7 +122,7 @@ public class BitmapEncoder {
         return output;
     }
 
-    static BufferedImage deepCopy(BufferedImage bi) {
+    protected static BufferedImage deepCopy(BufferedImage bi) {
         ColorModel cm = bi.getColorModel();
         boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
         WritableRaster raster = bi.copyData(null);
@@ -182,4 +182,46 @@ public class BitmapEncoder {
         }
         return filesToConvert;
     }
+    
+    protected BufferedImage getInputImage() {
+        return inputImage;
+    }
+
+    protected BufferedImage getOutputImage() {
+        return outputImage;
+    }
+
+    protected String getBitmapName() {
+        return bitmapName;
+    }
+
+    protected boolean isHexFormatting() {
+        return hexFormatting;
+    }
+
+    protected boolean isWrapping() {
+        return wrapping;
+    }
+
+    protected void setInputImage(BufferedImage inputImage) {
+        this.inputImage = inputImage;
+    }
+
+    protected void setOutputImage(BufferedImage outputImage) {
+        this.outputImage = outputImage;
+    }
+
+    protected void setBitmapName(String bitmapName) {
+        this.bitmapName = bitmapName;
+    }
+
+    protected void setHexFormatting(boolean hexFormatting) {
+        this.hexFormatting = hexFormatting;
+    }
+
+    protected void setWrapping(boolean wrapping) {
+        this.wrapping = wrapping;
+    }
+    
+    
 }
