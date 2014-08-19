@@ -16,24 +16,26 @@ import java.awt.image.*;
  */
 public class BitmapEncoder {
 
-    BufferedImage inputImage;
-    BufferedImage outputImage;
-    int encodedData[];
-    String bitmapName = "myBitmap";
-    boolean hexFormatting = false;
-    boolean wrapping = true;
+    private BufferedImage inputImage;
+    private BufferedImage outputImage;
+    private String bitmapName = "myBitmap";
+    private boolean hexFormatting = false;
+    private boolean wrapping = true;
+    private static File[] filesToConvert;
+    private static int imageCounter;
+    private static int fileCount;
 
-    void BitmapEncoder() {
+    protected void BitmapEncoder() {
     }
 
-    void open(File file) {
+    protected void open(File file) {
         try {
             inputImage = ImageIO.read(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
         if (inputImage != null) {
-            if ((inputImage.getWidth() > 200) || (inputImage.getHeight() > 200)){
+            if ((inputImage.getWidth() > 200) || (inputImage.getHeight() > 200)) {
                 inputImage = null;
                 return;
             }
@@ -41,7 +43,7 @@ public class BitmapEncoder {
         }
     }
 
-    void threshold(int thres) {
+    protected void threshold(int thres) {
         if (inputImage == null) {
             return;
         }
@@ -61,7 +63,7 @@ public class BitmapEncoder {
         }
     }
 
-    String generateOutput(int thres) {
+    protected String generateOutput(int thres) {
         if (inputImage == null) {
             return "";
         }
@@ -69,7 +71,7 @@ public class BitmapEncoder {
         output = output.concat("const byte ");
         output = output.concat(bitmapName);
         output = output.concat("[] PROGMEM = {");
-        int width = ((inputImage.getWidth()-1)/8+1)*8; //round to the closest larger multiple of 8
+        int width = ((inputImage.getWidth() - 1) / 8 + 1) * 8; //round to the closest larger multiple of 8
         output = output.concat(width + "," + inputImage.getHeight() + ",");
         if (wrapping) {
             output = output.concat("\n");
@@ -106,7 +108,8 @@ public class BitmapEncoder {
                     }
                 }
                 if (hexFormatting) {
-                    output = output.concat(Integer.toString(thisByte, 16).toUpperCase());
+                    output = output.concat(Integer.toString(thisByte, 16).
+                            toUpperCase());
                 }
                 output = output.concat(",");
             }
@@ -118,10 +121,104 @@ public class BitmapEncoder {
         return output;
     }
 
-    static BufferedImage deepCopy(BufferedImage bi) {
+    protected static BufferedImage deepCopy(BufferedImage bi) {
         ColorModel cm = bi.getColorModel();
         boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
         WritableRaster raster = bi.copyData(null);
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+    }
+
+    protected static int countFiles(File[] list, boolean recursed) {
+
+        if (list == null) {
+            return 0;
+        }
+
+        if (!recursed) {
+            fileCount = 0;
+        }
+
+        for (File f : list) {
+            if (f.isDirectory()) {
+                countFiles(f.listFiles(), true);
+            } else {
+                if (isImage(f)) {
+                    fileCount++;
+                }
+            }
+        }
+        return fileCount;
+    }
+
+    protected static boolean isImage(File f) {
+        boolean isImage = false;
+        if (f.getName().endsWith(".bmp") || f.getName().endsWith(".png")
+                || f.getName().endsWith(".jpeg")
+                || f.getName().endsWith(".jpg")) {
+            isImage = true;
+        }
+        return isImage;
+    }
+
+    protected static File[] processSelectedFiles(File[] list, boolean recursed) {
+        if (!recursed) {
+            filesToConvert = new File[countFiles(list, false)];
+            imageCounter = 0;
+        }
+        if (list == null) {
+            return null;
+        }
+
+        for (File f : list) {
+            if (f.isDirectory()) {
+                processSelectedFiles(f.listFiles(), true);
+            } else {
+                if (isImage(f)) {
+                    filesToConvert[imageCounter] = f;
+                    imageCounter++;
+                }
+            }
+        }
+        return filesToConvert;
+    }
+
+    protected BufferedImage getInputImage() {
+        return inputImage;
+    }
+
+    protected BufferedImage getOutputImage() {
+        return outputImage;
+    }
+
+    protected String getBitmapName() {
+        return bitmapName;
+    }
+
+    protected boolean isHexFormatting() {
+        return hexFormatting;
+    }
+
+    protected boolean isWrapping() {
+        return wrapping;
+    }
+
+    protected void setInputImage(BufferedImage inputImage) {
+        this.inputImage = inputImage;
+    }
+
+    protected void setOutputImage(BufferedImage outputImage) {
+        this.outputImage = outputImage;
+    }
+
+    protected void setBitmapName(String bitmapName) {
+        this.bitmapName = bitmapName;
+    }
+
+    protected void setHexFormatting(boolean hexFormatting) {
+        this.hexFormatting = hexFormatting;
+    }
+
+    protected void setWrapping(boolean wrapping) {
+        this.wrapping = wrapping;
     }
 }

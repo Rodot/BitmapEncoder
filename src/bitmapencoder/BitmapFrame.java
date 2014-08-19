@@ -5,10 +5,16 @@
  */
 package bitmapencoder;
 
-import java.io.*;
+import static bitmapencoder.BitmapEncoder.deepCopy;
+import static bitmapencoder.BitmapEncoder.isImage;
+import static bitmapencoder.BitmapEncoder.processSelectedFiles;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import bitmapencoder.BitmapEncoder;
 
 /**
  *
@@ -18,12 +24,34 @@ public class BitmapFrame extends javax.swing.JFrame {
 
     BitmapEncoder encoder = new BitmapEncoder();
     final JFileChooser fileChooser = new JFileChooser();
+    final JFileChooser multiFileChooser = new JFileChooser();
+    private File[] filesSelected = null;
+    private String lastSingleDirectory = System.getProperty("user.home");
+    private String lastMultiDirectory = System.getProperty("user.home");
+    private byte multiFormattingSetting = 1;
+    private byte singleFormattingSetting = 0;
+    private boolean multiWrapSetting = false;
+    private boolean singleWrapSetting = true;
+    private boolean allowDirectorySelection = false;
 
     /**
      * Creates new form BitmapFrame
      */
-    public BitmapFrame() {
+    private BitmapFrame() {
         initComponents();
+        try {
+            loadSettingsFromDisk();
+        } catch (IOException ex) {
+            Logger.getLogger(BitmapFrame.class.getName()).
+                    log(Level.SEVERE, null, ex);
+        }
+        formattingBox.setSelectedIndex((int) singleFormattingSetting);
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
+        wrapCheckbox.setSelected(singleWrapSetting);
+        encoder.setWrapping(wrapCheckbox.isSelected());
+        allowDirectorySelectionCheckBox.setSelected(allowDirectorySelection);
+        fileChooser.setCurrentDirectory(new File(lastSingleDirectory));
+        multiFileChooser.setCurrentDirectory(new File(lastMultiDirectory));
     }
 
     /**
@@ -35,6 +63,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         openButton = new javax.swing.JButton();
         message = new javax.swing.JLabel();
@@ -43,6 +72,10 @@ public class BitmapFrame extends javax.swing.JFrame {
         previewPanel = new javax.swing.JPanel();
         preview = new javax.swing.JLabel();
         thresholdSlider = new javax.swing.JSlider();
+        FileSelectionPanel = new javax.swing.JPanel();
+        singleFileModeRadioButton = new javax.swing.JRadioButton();
+        multiFileModeRadioButton = new javax.swing.JRadioButton();
+        allowDirectorySelectionCheckBox = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         outputScrollPane = new javax.swing.JScrollPane();
         outputTextArea = new javax.swing.JTextArea();
@@ -58,9 +91,14 @@ public class BitmapFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Bitmap Encoder - Gamebuino");
-        setMinimumSize(new java.awt.Dimension(640, 480));
+        setMinimumSize(new java.awt.Dimension(600, 502));
         setName("bitmapFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(800, 480));
+        setPreferredSize(new java.awt.Dimension(800, 600));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -108,7 +146,7 @@ public class BitmapFrame extends javax.swing.JFrame {
         );
         previewPanelLayout.setVerticalGroup(
             previewPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(preview, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(preview, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
         );
 
         thresholdSlider.setMaximum(765);
@@ -125,6 +163,60 @@ public class BitmapFrame extends javax.swing.JFrame {
             }
         });
 
+        FileSelectionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("File Selection Mode"));
+        FileSelectionPanel.setName(""); // NOI18N
+
+        buttonGroup1.add(singleFileModeRadioButton);
+        singleFileModeRadioButton.setSelected(true);
+        singleFileModeRadioButton.setText("Single File Mode");
+        singleFileModeRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                singleFileModeRadioButtonActionPerformed(evt);
+            }
+        });
+
+        buttonGroup1.add(multiFileModeRadioButton);
+        multiFileModeRadioButton.setText("Multi File Mode (disables preview)");
+        multiFileModeRadioButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                multiFileModeRadioButtonActionPerformed(evt);
+            }
+        });
+
+        allowDirectorySelectionCheckBox.setText("Allow directory selection");
+        allowDirectorySelectionCheckBox.setEnabled(false);
+        allowDirectorySelectionCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                allowDirectorySelectionCheckBoxActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout FileSelectionPanelLayout = new javax.swing.GroupLayout(FileSelectionPanel);
+        FileSelectionPanel.setLayout(FileSelectionPanelLayout);
+        FileSelectionPanelLayout.setHorizontalGroup(
+            FileSelectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(FileSelectionPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(FileSelectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(FileSelectionPanelLayout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(allowDirectorySelectionCheckBox))
+                    .addComponent(singleFileModeRadioButton)
+                    .addComponent(multiFileModeRadioButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        FileSelectionPanelLayout.setVerticalGroup(
+            FileSelectionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(FileSelectionPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(singleFileModeRadioButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(multiFileModeRadioButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(allowDirectorySelectionCheckBox)
+                .addContainerGap(8, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -132,31 +224,39 @@ public class BitmapFrame extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(originalPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(previewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(originalPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(previewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(FileSelectionPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(openButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(message)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(message, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(thresholdSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                    .addComponent(originalPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(previewPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(10, 10, 10))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(45, 45, 45)
+                        .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(FileSelectionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(openButton)
+                            .addComponent(message, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(originalPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(previewPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Output"));
@@ -174,17 +274,11 @@ public class BitmapFrame extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 444, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Settings"));
@@ -285,10 +379,10 @@ public class BitmapFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -300,9 +394,9 @@ public class BitmapFrame extends javax.swing.JFrame {
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 98, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -312,53 +406,242 @@ public class BitmapFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void scaleSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_scaleSliderStateChanged
-        redrawPreview();
+        if (singleFileModeRadioButton.isSelected()) {
+            redrawPreview();
+        }
     }//GEN-LAST:event_scaleSliderStateChanged
 
     private void formattingBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_formattingBoxActionPerformed
-        if (formattingBox.getSelectedIndex() == 1) {
-            encoder.hexFormatting = true;
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
+        if (singleFileModeRadioButton.isSelected()) {
+            singleFormattingSetting = (byte) formattingBox.getSelectedIndex();
+            updateOutput();
         } else {
-            encoder.hexFormatting = false;
+            multiFormattingSetting = (byte) formattingBox.getSelectedIndex();
+            processMultiFiles();
         }
-        updateOutput();
     }//GEN-LAST:event_formattingBoxActionPerformed
 
     private void wrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wrapCheckboxActionPerformed
-        if (wrapCheckbox.isSelected()) {
-            encoder.wrapping = true;
+        encoder.setWrapping(wrapCheckbox.isSelected());
+        if (singleFileModeRadioButton.isSelected()) {
+            singleWrapSetting = wrapCheckbox.isSelected();
+            updateOutput();
         } else {
-            encoder.wrapping = false;
+            multiWrapSetting = wrapCheckbox.isSelected();;
+            processMultiFiles();
         }
-        updateOutput();
     }//GEN-LAST:event_wrapCheckboxActionPerformed
 
     private void thresholdSliderMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_thresholdSliderMouseReleased
-        if (encoder.inputImage == null) {
+        if (encoder.getInputImage() == null && singleFileModeRadioButton.isSelected()) {
             message.setText("Open a image before you play with that slider!");
-        } else {
+        } else if (singleFileModeRadioButton.isSelected()) {
             message.setText("Loading...");
             redrawPreview();
             message.setText("Output updated");
+        } else if (multiFileModeRadioButton.isSelected()) {
+            processMultiFiles();
         }
     }//GEN-LAST:event_thresholdSliderMouseReleased
 
     private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
-        int returnVal = fileChooser.showOpenDialog(BitmapFrame.this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            encoder.open(file);
-            if (encoder.inputImage == null) {
-                message.setText("Can't open the selected image");
+        if (singleFileModeRadioButton.isSelected()) {
+            int returnVal = fileChooser.showOpenDialog(BitmapFrame.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastSingleDirectory = fileChooser.getCurrentDirectory().
+                        getAbsolutePath();
+                File file = fileChooser.getSelectedFile();
+                encoder.open(file);
+                if (encoder.getInputImage() == null) {
+                    message.setText("Can't open the selected image");
+                } else {
+                    message.setText("Image succesfully loaded");
+                    String fileName = file.getName();
+                    fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+                    nameTextField.setText(fileName);
+                    redrawPreview();
+                }
+            }
+        } else {
+
+            if (allowDirectorySelectionCheckBox.isSelected()) {
+                multiFileChooser.setFileSelectionMode(
+                        JFileChooser.FILES_AND_DIRECTORIES);
             } else {
-                message.setText("Image succesfully loaded");
-                String fileName = file.getName();
-                fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-                nameTextField.setText(fileName);
-                redrawPreview();
+                multiFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            }
+            multiFileChooser.setMultiSelectionEnabled(true);
+            int returnVal = multiFileChooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastMultiDirectory = multiFileChooser.getCurrentDirectory().
+                        getAbsolutePath();
+                filesSelected = multiFileChooser.getSelectedFiles();
+                processMultiFiles();
             }
         }
+        try {
+            saveSettingsToDisk(new File("settings.dat"));
+        } catch (IOException ex) {
+            Logger.getLogger(BitmapFrame.class.getName()).
+                    log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_openButtonActionPerformed
+
+    private void processMultiFiles() {
+        outputTextArea.setText("");
+        String eol = System.lineSeparator();
+        File[] filesToConvert = processSelectedFiles(filesSelected, false);
+        if (filesToConvert == null) {
+            return;
+        }
+        for (File f : filesToConvert) {
+            if (f != null) {
+                if (isImage(f)) {
+                    try {
+                        System.out.println("Reading image " + f.getName()
+                                + "...");
+                        BufferedImage img = ImageIO.read(f);
+                        if (img != null) {
+                            if ((img.getWidth() > 200) || (img.getHeight()
+                                    > 200)) {
+                                System.out.println("File " + f.getName()
+                                        + " is too large.");
+                                continue;
+                            }
+                            System.out.println("Deep copy of " + f.getName()
+                                    + ".");
+                            BufferedImage newImg = deepCopy(img);
+                            int threshold = thresholdSlider.getValue();
+                            System.out.println(
+                                    "Setting threshold for new image.");
+                            for (int y = 0; y < img.getHeight(); y++) {
+                                for (int x = 0; x < img.getWidth(); x++) {
+                                    int rgb = img.getRGB(x, y);
+                                    int red = (rgb >> 16) & 0x000000FF;
+                                    int green = (rgb >> 8) & 0x000000FF;
+                                    int blue = (rgb) & 0x000000FF;
+                                    int value = red + green + blue;
+                                    if (value > threshold) {
+                                        newImg.setRGB(x, y, 0x00FFFFFF);
+                                    } else {
+                                        newImg.setRGB(x, y, 0);
+                                    }
+                                }
+                            }
+                            String bitmapName = f.getName().substring(0, f.
+                                    getName().lastIndexOf("."));
+                            System.out.println("Generating output for " + f.
+                                    getName() + ".");
+                            String output = outputTextArea.getText();
+                            output = output.concat("const byte ");
+                            output = output.concat(bitmapName);
+                            output = output.concat("[] PROGMEM = {");
+                            if (encoder.isWrapping()) {
+                                output = output.concat(eol);
+                            }
+                            int width = ((img.getWidth() - 1) / 8 + 1) * 8; //round to the closest larger multiple of 8
+                            output = output.concat(width + "," + img.
+                                    getHeight() + ",");
+                            if (encoder.isWrapping()) {
+                                output = output.concat(eol);
+                            }
+                            for (int y = 0; y < img.getHeight(); y++) {
+                                for (int x = 0; x < img.getWidth(); x += 8) {
+                                    if (encoder.isHexFormatting()) {
+                                        output = output.concat("0x");
+                                    } else {
+                                        output = output.concat("B");
+                                    }
+                                    int thisByte = 0;
+                                    for (int b = 0; b < 8; b++) {
+                                        int value = 0xFFFF;
+                                        if (x + b < img.getWidth()) {
+                                            int rgb = img.getRGB(x + b, y);
+                                            int red = (rgb >> 16)
+                                                    & 0x000000FF;
+                                            int green = (rgb >> 8)
+                                                    & 0x000000FF;
+                                            int blue = (rgb) & 0x000000FF;
+                                            value = red + green + blue;
+                                        }
+                                        if (encoder.isHexFormatting()) {
+                                            thisByte *= 2;
+                                            if (value < threshold) {
+                                                thisByte++;
+                                            }
+                                        } else {//binary formatting
+                                            if (value < threshold) {
+                                                output = output.concat("1");
+                                            } else {
+                                                output = output.concat("0");
+                                            }
+
+                                        }
+                                    }
+                                    if (encoder.isHexFormatting()) {
+                                        output = output.concat(Integer.
+                                                toString(thisByte, 16).
+                                                toUpperCase());
+                                    }
+                                    output = output.concat(",");
+                                }
+                                if (encoder.isWrapping()) {
+                                    output = output.concat(eol);
+                                }
+                            }
+                            output = output.concat("};" + eol);
+                            if (encoder.isWrapping()) {
+                                output = output.concat(eol);
+                            }
+                            outputTextArea.setText(output);
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(BitmapFrame.class.
+                                getName()).
+                                log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    System.out.println("File " + f.getName()
+                            + " is not an image.");
+                }
+            }
+        }
+    }
+    private void singleFileModeRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singleFileModeRadioButtonActionPerformed
+        scaleSlider.setEnabled(true);
+        nameTextField.setEnabled(true);
+        allowDirectorySelectionCheckBox.setEnabled(false);
+        formattingBox.setSelectedIndex((int) singleFormattingSetting);
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
+        wrapCheckbox.setSelected(singleWrapSetting);
+        encoder.setWrapping(wrapCheckbox.isSelected());
+        updateOutput();
+    }//GEN-LAST:event_singleFileModeRadioButtonActionPerformed
+
+    private void multiFileModeRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multiFileModeRadioButtonActionPerformed
+        scaleSlider.setEnabled(false);
+        nameTextField.setEnabled(false);
+        allowDirectorySelectionCheckBox.setEnabled(true);
+        formattingBox.setSelectedIndex((int) multiFormattingSetting);
+        encoder.setHexFormatting(formattingBox.getSelectedIndex() == 1);
+        wrapCheckbox.setSelected(multiWrapSetting);
+        encoder.setWrapping(wrapCheckbox.isSelected());
+        processMultiFiles();
+    }//GEN-LAST:event_multiFileModeRadioButtonActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        try {
+            saveSettingsToDisk(new File("settings.dat"));
+        } catch (IOException ex) {
+            Logger.getLogger(BitmapFrame.class.getName()).
+                    log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formWindowClosing
+
+    private void allowDirectorySelectionCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_allowDirectorySelectionCheckBoxActionPerformed
+        allowDirectorySelection = allowDirectorySelectionCheckBox.isSelected();
+    }//GEN-LAST:event_allowDirectorySelectionCheckBoxActionPerformed
 
     /**
      * @param args the command line arguments
@@ -376,57 +659,119 @@ public class BitmapFrame extends javax.swing.JFrame {
              break;
              }
              }*/
-            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.
+                    getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException |
+                IllegalAccessException |
+                javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(BitmapFrame.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new BitmapFrame().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new BitmapFrame().setVisible(true);
         });
     }
 
-    public void redrawPreview() {
+    private void redrawPreview() {
         int scale = scaleSlider.getValue();
         //input image
-        Image in = BitmapEncoder.deepCopy(encoder.inputImage);
-        in = in.getScaledInstance(in.getWidth(null) * scale, in.getHeight(null) * scale, java.awt.Image.SCALE_REPLICATE);
+        Image in = BitmapEncoder.deepCopy(encoder.getInputImage());
+        in = in.getScaledInstance(in.getWidth(null) * scale, in.getHeight(null)
+                * scale, java.awt.Image.SCALE_REPLICATE);
         ImageIcon originalIcon = new ImageIcon(in);
         original.setText("");
         original.setIcon(originalIcon);
         //output image
         encoder.threshold(thresholdSlider.getValue());
-        Image out = BitmapEncoder.deepCopy(encoder.outputImage);
-        out = out.getScaledInstance(out.getWidth(null) * scale, out.getHeight(null) * scale, java.awt.Image.SCALE_REPLICATE);
+        Image out = BitmapEncoder.deepCopy(encoder.getOutputImage());
+        out = out.getScaledInstance(out.getWidth(null) * scale, out.getHeight(
+                null) * scale, java.awt.Image.SCALE_REPLICATE);
         ImageIcon previewIcon = new ImageIcon(out);
         preview.setText("");
         preview.setIcon(previewIcon);
         updateOutput();
     }
 
-    public void updateOutput() {
-        encoder.bitmapName = nameTextField.getText();
-        outputTextArea.setText(encoder.generateOutput(thresholdSlider.getValue()));
+    private void updateOutput() {
+        encoder.setBitmapName(nameTextField.getText());
+        outputTextArea.setText(encoder.
+                generateOutput(thresholdSlider.getValue()));
         outputTextArea.setCaretPosition(0);
     }
 
+    private void loadSettingsFromDisk() throws IOException {
+        File saveFile = new File("settings.dat");
+        if (saveFile.createNewFile()) {
+            saveSettingsToDisk(saveFile);
+        } else {
+            BufferedReader br = new BufferedReader(new FileReader(saveFile));
+            for (String line; (line = br.readLine()) != null;) {
+                String settingName = line.trim().substring(0, line.indexOf(":"));
+                String setting = line.substring((line.indexOf(":") + 1)).trim();
+                switch (settingName) {
+                    case "LAST_SINGLE_DIRECTORY":
+                        lastSingleDirectory = setting;
+                        break;
+                    case "LAST_MULTI_DIRECTORY":
+                        lastMultiDirectory = setting;
+                        break;
+                    case "SINGLE_FORMATTING":
+                        singleFormattingSetting = Byte.valueOf(setting);
+                        break;
+                    case "MULTI_FORMATTING":
+                        multiFormattingSetting = Byte.valueOf(setting);
+                        break;
+                    case "SINGLE_WRAPPING":
+                        singleWrapSetting = Boolean.valueOf(setting);
+                        break;
+                    case "MULTI_WRAPPING":
+                        multiWrapSetting = Boolean.valueOf(setting);
+                        break;
+                    case "ALLOW_DIRECTORY_SELECTION":
+                        allowDirectorySelection = Boolean.valueOf(setting);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // line is not visible here.
+        }
+    }
+
+    private void saveSettingsToDisk(File saveFile) throws IOException {
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(saveFile))) {
+            out.write("LAST_SINGLE_DIRECTORY: " + lastSingleDirectory);
+            out.newLine();
+            out.write("LAST_MULTI_DIRECTORY: " + lastMultiDirectory);
+            out.newLine();
+            out.write("SINGLE_FORMATTING: " + singleFormattingSetting);
+            out.newLine();
+            out.write("MULTI_FORMATTING: " + multiFormattingSetting);
+            out.newLine();
+            out.write("SINGLE_WRAPPING: " + singleWrapSetting);
+            out.newLine();
+            out.write("MULTI_WRAPPING: " + multiWrapSetting);
+            out.newLine();
+            out.write("ALLOW_DIRECTORY_SELECTION: " + allowDirectorySelection);
+            out.newLine();
+            out.close();
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel FileSelectionPanel;
+    private javax.swing.JCheckBox allowDirectorySelectionCheckBox;
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox formattingBox;
     private javax.swing.JLabel formattingLabel;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JLabel message;
+    private javax.swing.JRadioButton multiFileModeRadioButton;
     private javax.swing.JLabel nameLabel;
     private javax.swing.JTextField nameTextField;
     private javax.swing.JButton openButton;
@@ -438,6 +783,7 @@ public class BitmapFrame extends javax.swing.JFrame {
     private javax.swing.JPanel previewPanel;
     private javax.swing.JLabel scaleLabel;
     private javax.swing.JSlider scaleSlider;
+    private javax.swing.JRadioButton singleFileModeRadioButton;
     private javax.swing.JSlider thresholdSlider;
     private javax.swing.JCheckBox wrapCheckbox;
     private javax.swing.JLabel wrapLabel;
