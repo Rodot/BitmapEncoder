@@ -50,7 +50,15 @@ public class BitmapFrame extends javax.swing.JFrame {
         wrapCheckbox.setSelected(singleWrapSetting);
         encoder.setWrapping(wrapCheckbox.isSelected());
         allowDirectorySelectionCheckBox.setSelected(allowDirectorySelection);
+        File singleDirectory = new File(lastSingleDirectory);
+        if (!singleDirectory.exists()) {
+            lastSingleDirectory = System.getProperty("user.home");
+        }
         fileChooser.setCurrentDirectory(new File(lastSingleDirectory));
+        File multiDirectory = new File(lastMultiDirectory);
+        if (!multiDirectory.exists()) {
+            lastMultiDirectory = System.getProperty("user.home");
+        }
         multiFileChooser.setCurrentDirectory(new File(lastMultiDirectory));
     }
 
